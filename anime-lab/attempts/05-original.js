@@ -6,6 +6,8 @@ const { el, stroke, lock, sparkle, ink, rng, fmt } = B;
 
 const W = 800, H = 1000;
 const TILT = 'rotate(-4 400 600)';
+const CHAR_ONLY = process.env.LAYER === 'char'; // LAYER=char renders just the character, for compositing
+const DENSE = process.env.DENSE === '1'; // DENSE=1 fills every hair lock with fine strands
 const mirror = pts => pts.map(([x, y]) => [W - x, y]);
 const defs = [], out = [];
 const C = {
@@ -59,13 +61,27 @@ let clipN = 0;
 function drawLock(spine, w, o = {}) {
   const L = lock(spine, w, o);
   let s = '<g>' + el(L.body, o.fill || 'url(#hairGrad)') + el(L.shade, o.shadeFill || 'url(#hairShadeGrad)');
-  if (o.shine) {
+  if (o.shine || DENSE) {
     const id = 'c' + clipN++;
     defs.push(`<clipPath id="${id}"><path d="${L.body}"/></clipPath>`);
-    s += `<g clip-path="url(#${id})">${o.shine}</g>`;
+    s += `<g clip-path="url(#${id})">${DENSE ? fineStrands(spine, w, o.light ?? 0.35) : ''}${o.shine || ''}</g>`;
   }
   s += L.edges.map(d => el(d, o.lineColor || C.hairLine)).join('') + '</g>';
   return { svg: s, body: L.body };
+}
+
+// Fine strands following the lock's spine at random offsets, light and dark, clipped to the lock.
+let strandSeed = 100;
+function fineStrands(spine, w, light) {
+  const r = rng(strandSeed++);
+  let s = '';
+  for (let k = 0, n = Math.round(w / 3); k < n; k++) {
+    const f = (r() - 0.5) * 0.95 * w, side = B.ribbon(spine, () => 2 * Math.abs(f), 16)[f < 0 ? 'left' : 'right'];
+    const a = Math.floor(r() * side.length * 0.25), b = Math.floor(side.length * (0.55 + r() * 0.45));
+    const lit = r() < 0.6, op = lit ? light * (0.6 + r() * 0.7) : 0.18 + r() * 0.2;
+    s += stroke(side.slice(a, b), ink(0.6 + r() * 1.1, 0.25, 0.3), lit ? '#ffffff' : C.hairLine, { segs: 1, extra: `opacity="${fmt(op)}"` });
+  }
+  return s;
 }
 
 // The "angel ring": jagged highlight band that follows the curve of the head.
@@ -146,10 +162,10 @@ for (const [p, w] of [[[[296, 430], [292, 560], [286, 680], [280, 770]], 50], [[
 const ahoge = drawLock([[402, 150], [408, 105], [430, 78], [458, 72], [474, 88]], 15, { tip: 0.35, line: 2.2 });
 
 // ---------- background
-out.push(`<rect width="${W}" height="${H}" fill="url(#sky)"/>`);
+if (!CHAR_ONLY) out.push(`<rect width="${W}" height="${H}" fill="url(#sky)"/>`);
 const r1 = rng(5);
-for (let i = 0; i < 45; i++) out.push(sparkle(r1() * W, r1() * 620, 1.5 + r1() * 6, '#fff', `opacity="${fmt(0.35 + r1() * 0.65)}"`));
-out.push(`<circle cx="400" cy="340" r="340" fill="url(#moon)"/>`);
+if (!CHAR_ONLY) for (let i = 0; i < 45; i++) out.push(sparkle(r1() * W, r1() * 620, 1.5 + r1() * 6, '#fff', `opacity="${fmt(0.35 + r1() * 0.65)}"`));
+if (!CHAR_ONLY) out.push(`<circle cx="400" cy="340" r="340" fill="url(#moon)"/>`);
 
 // ---------- back hair, with rim light from the moon behind her
 out.push(`<g transform="${TILT}">`, el(BACK, C.hairBack));
@@ -215,6 +231,7 @@ const BROW = [[354, 372], [326, 361], [296, 360], [270, 369]];
 out.push(`<g opacity="0.75">${stroke(BROW, ink(5, 0.08, 0.6), C.hairLine)}${stroke(mirror(BROW), ink(5, 0.08, 0.6), C.hairLine)}</g>`, '</g>');
 
 // ---------- lighting and foreground sparkle
+if (!CHAR_ONLY) {
 out.push(`<rect width="${W}" height="${H}" fill="url(#light)" style="mix-blend-mode:soft-light" opacity="0.55"/>`);
 const r2 = rng(21);
 for (let i = 0; i < 14; i++) {
@@ -223,5 +240,6 @@ for (let i = 0; i < 14; i++) {
 }
 for (let i = 0; i < 8; i++) out.push(sparkle(30 + r2() * 740, 40 + r2() * 300, 4 + r2() * 8, '#fff', 'opacity="0.9"'));
 
-fs.writeFileSync(__dirname + '/05-original.svg',
+}
+fs.writeFileSync(__dirname + '/05-original' + (DENSE ? '-dense' : '') + (CHAR_ONLY ? '-char' : '') + '.svg',
   `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs>${defs.join('')}</defs>\n${out.join('\n')}\n</svg>\n`);
