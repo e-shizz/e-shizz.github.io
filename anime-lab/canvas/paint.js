@@ -203,3 +203,31 @@ flatten = function () {
   layers.splice(0, layers.length, ...keep);
   return out;
 };
+
+// ---------- eyedropper: sample colours from a reference image (for master studies)
+let refPixels = null;
+async function loadRef(url) {
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  const c = canvas(), x = c.getContext('2d');
+  x.drawImage(img, 0, 0, W, H);
+  refPixels = x.getImageData(0, 0, W, H).data;
+}
+const toHex = c => '#' + c.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
+const lum = c => 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
+function refAt(x, y) {
+  const i = (Math.max(0, Math.min(H - 1, Math.round(y))) * W + Math.max(0, Math.min(W - 1, Math.round(x)))) * 4;
+  return [refPixels[i], refPixels[i + 1], refPixels[i + 2]];
+}
+// Median colour in a small window around (x, y).
+function pick(x, y, r = 2) {
+  const s = [];
+  for (let i = -r; i <= r; i++) for (let j = -r; j <= r; j++) s.push(refAt(x + i, y + j));
+  return toHex([0, 1, 2].map(k => s.map(p => p[k]).sort((a, b) => a - b)[s.length >> 1]));
+}
+// Colour at a luminance percentile among samples along a path (0 = darkest, 1 = lightest).
+function pickAlong(pts, p = 0.5) {
+  const s = pts.map(([x, y]) => refAt(x, y)).sort((a, b) => lum(a) - lum(b));
+  return toHex(s[Math.min(s.length - 1, Math.floor(p * s.length))]);
+}

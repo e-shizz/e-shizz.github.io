@@ -111,6 +111,20 @@ xvfb-run -a blender -b --factory-startup -P blender/animate.py -- canvas/out/gir
 ```
 (Blender 4.2 LTS from download.blender.org; on a bare Linux box also `apt-get install libegl1 xvfb`.)
 
+## Master study of the model's own image (`canvas/model-study.js`)
+The "model only" image (`experiments/out/D-text-only.png`) was the most natural-looking result, so I copied it by
+hand with the canvas brush engine. No model is involved in the painting. Same study method as before:
+grid measurements, overlay checks, and a built-in eyedropper (`pick`, `pickAlong` in `paint.js`) that samples
+the reference while painting. Four rounds; things I learned from how the model renders:
+- **Rim light** on the lit side of the jaw (#fcf0e4) is what makes a muted night-lit face (#b99f9a) read bright.
+- **Bangs fall over the eyes.** Strands crossing the lash line add depth; ending them above the brows looks flat.
+- **Big irises, little white.** The iris fills most of the eye opening.
+- **Soft gradients beat hard shadow stripes** on long hair, and tips should split into thin strands.
+- The nose is a soft shadow, not a highlight; the open smile needs a lower-lip curve.
+
+Run: `node canvas/run.js canvas/model-study.js canvas/out/model-study.png - canvas/ref/model-full.png`
+(`canvas/ref/model-full.png` is the model image upscaled to 800×1000.)
+
 ## Next ideas (attempts 04-05)
 - A real 3/4 view instead of front-on.
 - Hands, or a full upper-body pose.
