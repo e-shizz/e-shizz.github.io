@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="700" viewBox="0 0 600 700">
+  <defs>
+    <linearGradient id="iris" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1d3a52"/><stop offset="0.55" stop-color="#4f8fb8"/><stop offset="1" stop-color="#9fd0ea"/>
+    </linearGradient>
+    <linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fc0d6"/><stop offset="1" stop-color="#5f98b4"/>
+    </linearGradient>
+  </defs>
+  <g stroke="#2b3238" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <!-- twin tails (behind) -->
+    <path d="M175,200 C120,260 110,420 135,560 L160,500 L170,580 C185,470 190,330 200,250 Z" fill="url(#hair)"/>
+    <path d="M425,200 C480,260 490,420 465,560 L440,500 L430,580 C415,470 410,330 400,250 Z" fill="url(#hair)"/>
+    <!-- back of head -->
+    <path d="M180,300 C160,150 250,90 300,90 C350,90 440,150 420,300 Z" fill="url(#hair)"/>
+    <!-- dress shoulders -->
+    <path d="M150,700 C160,600 220,560 300,555 C380,560 440,600 450,700 Z" fill="#1f2d5a"/>
+    <!-- neck -->
+    <path d="M275,420 L272,500 C290,515 310,515 328,500 L325,420 Z" fill="#f6dcc0"/>
+    <!-- frilly collar -->
+    <path d="M230,520 Q245,505 260,520 Q275,500 290,515 Q300,500 310,515 Q325,500 340,520 Q355,505 370,520 L360,590 Q300,620 240,590 Z" fill="#f2efe6"/>
+    <!-- ears -->
+    <path d="M212,300 C190,290 188,345 214,355" fill="#f6dcc0"/>
+    <path d="M388,300 C410,290 412,345 386,355" fill="#f6dcc0"/>
+    <!-- face -->
+    <path d="M210,230 C205,330 235,405 300,435 C365,405 395,330 390,230 Z" fill="#fbe6cf"/>
+  </g>
+  <!-- blush -->
+  <g fill="#f29a9a" opacity="0.45">
+    <ellipse cx="243" cy="372" rx="22" ry="9"/><ellipse cx="357" cy="372" rx="22" ry="9"/>
+  </g>
+  <g stroke="#c96b6b" stroke-width="1.5" opacity="0.6">
+    <path d="M233,368 l-4,8 M243,368 l-4,8 M253,368 l-4,8"/><path d="M351,368 l-4,8 M361,368 l-4,8 M371,368 l-4,8"/>
+  </g>
+  <!-- eyes -->
+  <g id="eyeL">
+    <path d="M222,322 C222,290 278,290 278,322 C278,362 222,362 222,322 Z" fill="#fff"/>
+    <ellipse cx="252" cy="330" rx="21" ry="28" fill="url(#iris)" stroke="#1a2530" stroke-width="2"/>
+    <ellipse cx="253" cy="333" rx="10" ry="14" fill="#10202c"/>
+    <ellipse cx="244" cy="318" rx="8" ry="10" fill="#fff"/>
+    <circle cx="262" cy="345" r="4" fill="#fff"/>
+    <path d="M215,312 C230,288 268,286 284,306" fill="none" stroke="#1a1a1a" stroke-width="7" stroke-linecap="round"/>
+    <path d="M226,358 C240,364 262,364 275,356" fill="none" stroke="#3a2a2a" stroke-width="2"/>
+  </g>
+  <g id="eyeR">
+    <path d="M322,322 C322,290 378,290 378,322 C378,362 322,362 322,322 Z" fill="#fff"/>
+    <ellipse cx="348" cy="330" rx="21" ry="28" fill="url(#iris)" stroke="#1a2530" stroke-width="2"/>
+    <ellipse cx="347" cy="333" rx="10" ry="14" fill="#10202c"/>
+    <ellipse cx="340" cy="318" rx="8" ry="10" fill="#fff"/>
+    <circle cx="358" cy="345" r="4" fill="#fff"/>
+    <path d="M316,306 C332,286 370,288 385,312" fill="none" stroke="#1a1a1a" stroke-width="7" stroke-linecap="round"/>
+    <path d="M325,356 C338,364 360,364 374,358" fill="none" stroke="#3a2a2a" stroke-width="2"/>
+  </g>
+  <!-- brows -->
+  <g fill="none" stroke="#3d6a80" stroke-width="3" stroke-linecap="round">
+    <path d="M228,282 Q250,272 272,280"/><path d="M328,280 Q350,272 372,282"/>
+  </g>
+  <!-- nose -->
+  <path d="M302,370 l-3,6" stroke="#c99a80" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- open smiling mouth -->
+  <path d="M276,392 Q300,388 324,392 Q318,422 300,424 Q282,422 276,392 Z" fill="#7a2f35" stroke="#2b1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M284,412 Q300,402 316,412 Q310,422 300,423 Q290,422 284,412 Z" fill="#e88a8a"/>
+  <!-- bangs (front hair) -->
+  <path d="M195,250 C190,140 260,110 300,112 C345,110 412,140 405,250
+           L392,300 L380,232 L362,286 L350,222 L330,262 L318,205
+           L300,250 L285,205 L270,262 L250,222 L238,286 L220,232 L208,300 Z"
+        fill="url(#hair)" stroke="#2b3238" stroke-width="3" stroke-linejoin="round"/>
+  <!-- hair shine -->
+  <g fill="none" stroke="#e8f6fc" stroke-width="3" stroke-linecap="round" opacity="0.9">
+    <path d="M245,150 l10,20 l-6,4 l10,18"/><path d="M340,145 l8,18 l-6,5 l8,16"/>
+  </g>
+  <!-- puzzle-piece ornaments -->
+  <g fill="#c8cacc" stroke="#2b3238" stroke-width="3" stroke-linejoin="round">
+    <path d="M150,140 h30 a12,12 0 1 1 20,0 h30 v30 a12,12 0 1 0 0,20 v30 h-80 Z"/>
+    <path d="M370,140 h30 a12,12 0 1 1 20,0 h30 v80 h-30 a12,12 0 1 0 -20,0 h-30 Z"/>
+  </g>
+  <text x="412" y="196" font-size="30" text-anchor="middle" fill="#222" font-family="serif">祖</text>
+  <!-- tiny apron badge -->
+  <path d="M285,560 h12 a6,6 0 1 1 8,0 h12 v24 h-32 Z" fill="#c8cacc" stroke="#2b3238" stroke-width="2"/>
+</svg>

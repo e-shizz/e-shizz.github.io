@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="700" viewBox="0 0 600 700">
+  <defs>
+    <linearGradient id="iris" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16314a"/><stop offset="0.5" stop-color="#3f7fa8"/><stop offset="1" stop-color="#a6d8f0"/>
+    </linearGradient>
+    <linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#94c4da"/><stop offset="1" stop-color="#6aa2bd"/>
+    </linearGradient>
+    <linearGradient id="skinShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9c2a4" stop-opacity="0.8"/><stop offset="1" stop-color="#e9c2a4" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g stroke="#2b3238" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <!-- twin tails: curved clumps with split ends -->
+    <path d="M170,190 C110,250 100,400 118,520 C122,555 130,585 140,600 C142,570 150,555 158,548 C160,575 168,595 180,605 C178,520 186,380 205,250 Z" fill="url(#hair)"/>
+    <path d="M430,190 C490,250 500,400 482,520 C478,555 470,585 460,600 C458,570 450,555 442,548 C440,575 432,595 420,605 C422,520 414,380 395,250 Z" fill="url(#hair)"/>
+    <!-- dress -->
+    <path d="M140,700 C150,610 215,568 300,564 C385,568 450,610 460,700 Z" fill="#1f2d5a"/>
+    <!-- neck -->
+    <path d="M278,420 L276,478 C292,490 308,490 324,478 L322,420 Z" fill="#f6dcc0"/>
+    <path d="M278,440 C292,455 308,455 322,440 L322,420 L278,420 Z" fill="url(#skinShade)" stroke="none"/>
+    <!-- frilly collar -->
+    <path d="M232,500 Q246,484 260,498 Q272,480 286,494 Q300,478 314,494 Q328,480 340,498 Q354,484 368,500 L372,560 Q300,598 228,560 Z" fill="#f2efe6"/>
+    <path d="M300,490 L300,580" fill="none" stroke-width="2"/>
+    <!-- head mass -->
+    <path d="M180,290 C165,150 245,92 300,92 C355,92 435,150 420,290 Z" fill="url(#hair)" stroke="none"/>
+    <path d="M180,290 C165,150 245,92 300,92 C355,92 435,150 420,290" fill="none"/>
+    <!-- ears -->
+    <path d="M208,312 C186,300 184,350 210,362 Z" fill="#f6dcc0"/>
+    <path d="M392,312 C414,300 416,350 390,362 Z" fill="#f6dcc0"/>
+    <!-- face: round cheeks, soft chin -->
+    <path d="M205,240 C200,330 225,395 270,422 Q300,438 330,422 C375,395 400,330 395,240 Z" fill="#fbe6cf"/>
+  </g>
+  <!-- blush -->
+  <g fill="#f29a9a" opacity="0.5"><ellipse cx="238" cy="378" rx="22" ry="9"/><ellipse cx="362" cy="378" rx="22" ry="9"/></g>
+  <g stroke="#c96b6b" stroke-width="1.5" opacity="0.6">
+    <path d="M228,374 l-4,8 M238,374 l-4,8 M248,374 l-4,8"/><path d="M356,374 l-4,8 M366,374 l-4,8 M376,374 l-4,8"/>
+  </g>
+  <!-- eyes: tall, big iris, heavy upper lash -->
+  <g>
+    <path d="M216,322 C216,282 282,282 282,322 C282,370 216,370 216,322 Z" fill="#fff"/>
+    <ellipse cx="252" cy="330" rx="24" ry="33" fill="url(#iris)" stroke="#14202a" stroke-width="2"/>
+    <ellipse cx="253" cy="332" rx="11" ry="16" fill="#0d1a24"/>
+    <ellipse cx="243" cy="314" rx="9" ry="12" fill="#fff"/>
+    <circle cx="263" cy="350" r="4.5" fill="#fff"/>
+    <path d="M208,314 C222,282 270,278 290,302 L284,306 C266,290 230,292 214,318 Z" fill="#141414" stroke="#141414" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M222,364 C238,370 264,370 278,362" fill="none" stroke="#4a3030" stroke-width="2"/>
+  </g>
+  <g>
+    <path d="M318,322 C318,282 384,282 384,322 C384,370 318,370 318,322 Z" fill="#fff"/>
+    <ellipse cx="348" cy="330" rx="24" ry="33" fill="url(#iris)" stroke="#14202a" stroke-width="2"/>
+    <ellipse cx="347" cy="332" rx="11" ry="16" fill="#0d1a24"/>
+    <ellipse cx="338" cy="314" rx="9" ry="12" fill="#fff"/>
+    <circle cx="358" cy="350" r="4.5" fill="#fff"/>
+    <path d="M392,314 C378,282 330,278 310,302 L316,306 C334,290 370,292 386,318 Z" fill="#141414" stroke="#141414" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M322,362 C336,370 362,370 378,364" fill="none" stroke="#4a3030" stroke-width="2"/>
+  </g>
+  <!-- nose + mouth -->
+  <path d="M303,374 l-3,6" stroke="#c99a80" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M274,394 Q300,390 326,394 Q320,428 300,430 Q280,428 274,394 Z" fill="#7a2f35" stroke="#2b1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M283,417 Q300,406 317,417 Q311,428 300,429 Q289,428 283,417 Z" fill="#e88a8a"/>
+  <!-- bangs: curved strand clumps -->
+  <g fill="url(#hair)" stroke="#2b3238" stroke-width="3" stroke-linejoin="round">
+    <path d="M190,260 C185,150 255,112 300,112 C345,112 415,150 410,260 C400,225 385,200 372,190 C375,215 372,240 366,262 C356,225 340,200 325,188 C326,215 318,240 308,258 C305,225 298,200 292,188 C282,215 270,240 262,262 C258,235 250,210 236,192 C226,215 218,240 214,272 C206,245 198,250 190,260 Z"/>
+    <!-- side locks framing face -->
+    <path d="M196,230 C188,290 192,350 206,400 C214,370 214,320 214,272 Z"/>
+    <path d="M404,230 C412,290 408,350 394,400 C386,370 386,320 386,272 Z"/>
+  </g>
+  <!-- strand lines and shine -->
+  <g fill="none" stroke="#3c5868" stroke-width="1.8" stroke-linecap="round" opacity="0.7">
+    <path d="M262,140 C255,170 250,190 249,210"/><path d="M338,140 C345,170 350,190 351,210"/><path d="M300,120 L300,170"/>
+  </g>
+  <g fill="none" stroke="#eef9fe" stroke-width="3.5" stroke-linecap="round">
+    <path d="M232,150 l9,16 l-7,3 l10,17"/><path d="M356,150 l9,16 l-7,3 l10,17"/>
+  </g>
+  <!-- puzzle-piece ornaments, tilted -->
+  <g fill="#c9cbcd" stroke="#2b3238" stroke-width="3" stroke-linejoin="round">
+    <path transform="rotate(-18 190 150)" d="M160,120 h22 a10,10 0 1 1 16,0 h22 v22 a10,10 0 1 1 0,16 v22 h-22 a10,10 0 1 0 -16,0 h-22 Z"/>
+    <path transform="rotate(14 410 150)" d="M380,120 h22 a10,10 0 1 1 16,0 h22 v22 a10,10 0 1 1 0,16 v22 h-22 a10,10 0 1 0 -16,0 h-22 Z"/>
+  </g>
+  <text x="410" y="161" font-size="28" text-anchor="middle" fill="#222" font-family="serif" transform="rotate(14 410 150)">祖</text>
+  <path d="M286,525 h10 a5,5 0 1 1 8,0 h10 v20 a5,5 0 1 0 0,8 v4 h-28 Z" fill="#c9cbcd" stroke="#2b3238" stroke-width="2"/>
+</svg>
