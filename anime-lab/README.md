@@ -125,6 +125,17 @@ the reference while painting. Four rounds; things I learned from how the model r
 Run: `node canvas/run.js canvas/model-study.js canvas/out/model-study.png - canvas/ref/model-full.png`
 (`canvas/ref/model-full.png` is the model image upscaled to 800×1000.)
 
+## Original girl #2, no reference (`canvas/girl2.js`)
+New practice after the model study, painted from scratch with the canvas engine and no reference image.
+The new character has chestnut hair with side-swept bangs, a star clip, emerald eyes, a cream cardigan and a
+green ribbon tie, in golden-hour light from the right. Lessons applied: natural proportions (eye line at mid-face,
+chin ~155 px below it), big irises, bangs over the eyes, a warm rim light on the lit jaw and hair, soft hair
+gradients with split tips, and bang shadows on the forehead. Practice round 2 fixed a boxy nape, a flat
+"helmet" crown (now strands clipped to the head shape) and square shoulders.
+`canvas/out/progress.png` shows the path: first SVG original → hand-painted study of the model → this.
+
+Run: `node canvas/run.js canvas/girl2.js canvas/out/girl2.png`
+
 ## Next ideas (attempts 04-05)
 - A real 3/4 view instead of front-on.
 - Hands, or a full upper-body pose.
