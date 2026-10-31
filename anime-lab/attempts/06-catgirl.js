@@ -1,0 +1,270 @@
+// Attempt 06: master study of a reference illustration (cat-eared girl).
+// Landmarks were measured off a grid laid over the reference; the drawing itself is the brush engine.
+// Run: node attempts/06-catgirl.js && node render.js attempts/06-catgirl.svg attempts/06-catgirl.png
+const fs = require('fs');
+const B = require('../engine/brush');
+const { el, stroke, lock, ink, pw, rng, fmt, spline } = B;
+
+const W = 857, H = 1200;
+const defs = [], out = [], overHair = [];
+const C = {
+  line: '#24161f', hairLine: '#1f141d', redLid: '#8a3a40',
+  skin: '#f8d8d9', skinLight: '#fdebeb', skinShade: '#ecb3b9', skinDeep: '#d6939e', skinLine: '#4a2a32',
+  shirt: '#f3bccf', shirtLight: '#fbdbe6', shirtShade: '#dc97b3', shirtDeep: '#b8739a', shirtLine: '#7a3f62',
+};
+
+// ---------- shared shapes
+const FACE = 'M252,170 C236,250 228,330 236,410 C242,440 252,462 268,478 C284,503 300,525 316,541 C335,556 350,565 366,571 C384,580 400,588 412,593 C422,597 432,600 440,601 C455,598 468,593 480,588 C492,580 502,573 511,566 C518,557 525,549 531,541 C538,532 545,523 551,514 C562,494 574,460 582,425 C592,370 596,300 590,200 C560,160 500,145 430,142 C350,142 290,150 252,170 Z';
+const NECK = 'M376,560 L510,548 L506,630 L512,680 L562,668 L440,740 L300,662 L370,676 L384,632 Z';
+const SHIRT = 'M300,662 C350,700 400,726 440,728 C480,726 520,700 560,670 C600,650 660,660 705,680 C760,705 800,745 814,800 C822,860 824,950 826,1200 L50,1200 C52,1100 54,1000 58,880 C62,800 72,740 98,694 C120,672 170,662 230,656 C260,656 285,658 300,662 Z';
+const CHOKER = 'M372,582 C392,596 418,608 440,611 C462,609 488,597 512,580 L507,623 C488,636 464,646 440,647 C416,646 394,638 380,630 Z';
+const BACKHAIR = 'M140,0 L705,0 L692,110 L716,200 L706,262 L732,352 L762,452 L800,560 L838,648 L857,700 L857,1200 L0,1200 L0,660 L32,580 L60,470 L88,350 L118,262 L138,160 Z';
+const CAT = 'M300,1135 L300,1000 L316,946 L352,982 C380,972 420,968 450,970 C480,970 510,975 530,982 L548,934 L566,996 L566,1135 Z';
+
+defs.push(`
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c3bdc9"/><stop offset="0.55" stop-color="#d8cdd7"/><stop offset="1" stop-color="#f0dde4"/></linearGradient>
+<radialGradient id="glow" cx="790" cy="300" r="420" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff8fa" stop-opacity="0.95"/><stop offset="1" stop-color="#fff8fa" stop-opacity="0"/></radialGradient>
+<linearGradient id="hair" gradientUnits="userSpaceOnUse" x1="150" y1="0" x2="770" y2="0"><stop offset="0" stop-color="#3a2836"/><stop offset="0.45" stop-color="#4e3747"/><stop offset="0.72" stop-color="#8d6877"/><stop offset="1" stop-color="#c99fac"/></linearGradient>
+<linearGradient id="hairShade" gradientUnits="userSpaceOnUse" x1="150" y1="0" x2="770" y2="0"><stop offset="0" stop-color="#281b26"/><stop offset="0.45" stop-color="#372533"/><stop offset="0.72" stop-color="#6a4b5b"/><stop offset="1" stop-color="#9c7484"/></linearGradient>
+<linearGradient id="shirtGrad" gradientUnits="userSpaceOnUse" x1="50" y1="0" x2="830" y2="0"><stop offset="0" stop-color="#c88eb0"/><stop offset="0.33" stop-color="#e5a8c2"/><stop offset="0.6" stop-color="#f4c1d3"/><stop offset="1" stop-color="#f8cfdc"/></linearGradient>
+<radialGradient id="blush"><stop offset="0" stop-color="#f17f92" stop-opacity="0.8"/><stop offset="0.6" stop-color="#f17f92" stop-opacity="0.55"/><stop offset="1" stop-color="#f17f92" stop-opacity="0"/></radialGradient>
+<radialGradient id="cheekLight"><stop offset="0" stop-color="#fff4f4" stop-opacity="0.9"/><stop offset="1" stop-color="#fff4f4" stop-opacity="0"/></radialGradient>
+<linearGradient id="light" x1="0" y1="0" x2="1" y2="0.25"><stop offset="0" stop-color="#2b1f45" stop-opacity="0.55"/><stop offset="0.55" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#fff3f6" stop-opacity="0.9"/></linearGradient>
+<filter id="blur2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2"/></filter>
+<filter id="blur8" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter>
+<clipPath id="faceClip"><path d="${FACE}"/></clipPath>
+<clipPath id="neckClip"><path d="${NECK}"/></clipPath>
+<clipPath id="shirtClip"><path d="${SHIRT}"/></clipPath>
+<clipPath id="catClip"><path d="${CAT}"/></clipPath>`);
+
+let maskN = 0;
+function crescent(d, dx, dy, fill, extra = '') {
+  const id = 'm' + maskN++;
+  defs.push(`<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#fff"/><path d="${d}" transform="translate(${dx},${dy})" fill="#000"/></mask>`);
+  return `<path d="${d}" fill="${fill}" mask="url(#${id})" ${extra}/>`;
+}
+
+// Hair lock lit from the right: the shaded band runs down its left edge.
+function hairLock(spine, w, o = {}) {
+  const L = lock(spine, w, { shade: 'left', ...o });
+  let s = '<g>' + el(L.body, o.fill || 'url(#hair)') + el(L.shade, o.shadeFill || 'url(#hairShade)');
+  if (o.strands) s += strandLines(spine, w, o.strands, o.strandColor || '#7a5d72', o.seed || 1);
+  s += L.edges.map(d => el(d, o.lineColor || C.hairLine)).join('') + '</g>';
+  return { svg: s, body: L.body };
+}
+
+// Thin texture lines running along a lock.
+function strandLines(spine, w, n, color, seed) {
+  const r = rng(seed), c = spline(spine, 12);
+  let s = '';
+  for (let k = 0; k < n; k++) {
+    const f = (r() - 0.5) * 0.55 * w;
+    const a = Math.floor(r() * c.length * 0.25), b = Math.floor(c.length * (0.55 + r() * 0.2));
+    const pts = c.slice(a, b).map(([x, y]) => [x + f, y]);
+    if (pts.length > 3) s += stroke(pts, ink(1 + r() * 1.2, 0.3, 0.3), color, { segs: 1, extra: 'opacity="0.8"' });
+  }
+  return s;
+}
+
+function eye(o) {
+  const open = B.path(spline(o.open.concat([o.open[0]]), 8));
+  defs.push(`<clipPath id="${o.id}"><path d="${open}"/></clipPath>`,
+    `<linearGradient id="${o.id}-iris" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#271c4a"/><stop offset="0.42" stop-color="#583b98"/><stop offset="0.72" stop-color="#a77de2"/><stop offset="1" stop-color="#f2c6f6"/></linearGradient>`,
+    `<linearGradient id="${o.id}-lid" gradientUnits="userSpaceOnUse" x1="0" y1="${o.lidTop}" x2="0" y2="${o.lidTop + 20}"><stop offset="0" stop-color="#2a1d45" stop-opacity="0.75"/><stop offset="1" stop-color="#2a1d45" stop-opacity="0"/></linearGradient>`);
+  const [ix, iy] = o.iris, [rx, ry] = o.r;
+  let g = `<g clip-path="url(#${o.id})">` + el(open, '#e4e2ee') + el(o.scleraShade, '#b7b3c8');
+  g += `<ellipse cx="${ix}" cy="${iy}" rx="${rx}" ry="${ry}" fill="url(#${o.id}-iris)" stroke="#1b1431" stroke-width="2.2"/>`;
+  // crystalline lower half: lavender pool, pink flecks, lighter facets
+  g += `<ellipse cx="${ix + 1}" cy="${fmt(iy + ry * 0.48)}" rx="${fmt(rx * 0.72)}" ry="${fmt(ry * 0.38)}" fill="#d9aef6" opacity="0.85"/>`;
+  for (const [dx, dy, r, c] of [[-0.35, 0.55, 0.16, '#f7cdf2'], [0.3, 0.6, 0.13, '#f9d6f6'], [0.05, 0.75, 0.12, '#ffffff'], [-0.55, 0.2, 0.1, '#c79cf0'], [0.55, 0.15, 0.1, '#b48ae8']])
+    g += `<circle cx="${fmt(ix + dx * rx)}" cy="${fmt(iy + dy * ry)}" r="${fmt(r * rx)}" fill="${c}" opacity="0.9"/>`;
+  for (let a = 200; a <= 340; a += 28) {
+    const t = a * Math.PI / 180;
+    g += stroke([[ix + Math.cos(t) * rx * 0.3, iy + Math.sin(t) * -ry * 0.3], [ix + Math.cos(t) * rx * 0.85, iy + Math.sin(t) * -ry * 0.85]], ink(2, 0.3, 0.3), '#c49af0', { extra: 'opacity="0.6"' });
+  }
+  g += `<ellipse cx="${ix - 3}" cy="${iy - 4}" rx="${fmt(rx * 0.24)}" ry="${fmt(ry * 0.33)}" fill="#3d2c70" stroke="#120b22" stroke-width="3"/>`;
+  g += el(open, `url(#${o.id}-lid)`) + '</g>';
+  g += stroke(o.lash, o.lashW, C.line);
+  for (const e of o.extra) g += stroke(e[0], e[1], e[2] || C.line);
+  for (const [x, y, r] of o.hl) g += `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/>`;
+  for (const [x, y, rx2, ry2, c] of o.blobs) g += `<ellipse cx="${x}" cy="${y}" rx="${rx2}" ry="${ry2}" fill="${c}" opacity="0.92"/>`;
+  return g;
+}
+
+// ---------- background: cool wall on the left, glowing window on the right
+out.push(`<rect width="${W}" height="${H}" fill="url(#bg)"/>`);
+out.push(`<rect x="700" y="30" width="170" height="640" fill="#f3dfe6" filter="url(#blur8)"/>`);
+for (const [x, y, w, h] of [[726, 66, 34, 122], [806, 66, 60, 122], [726, 226, 34, 215], [806, 226, 60, 215], [726, 478, 34, 150], [806, 478, 60, 170]])
+  out.push(`<rect x="${x - 6}" y="${y - 6}" width="${w + 12}" height="${h + 12}" rx="14" fill="#f8e6ec"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="#fffbfc"/>`);
+out.push(`<rect width="${W}" height="${H}" fill="url(#glow)"/>`);
+const rp = rng(4);
+for (let i = 0; i < 26; i++) {
+  const left = i < 18, x = left ? 15 + rp() * 90 : 640 + rp() * 200, y = 140 + rp() * (left ? 340 : 600);
+  out.push(`<circle cx="${fmt(x)}" cy="${fmt(y)}" r="${fmt(1 + rp() * 2.2)}" fill="#fff" opacity="${fmt(0.5 + rp() * 0.5)}"/>`);
+}
+
+// ---------- back hair and ears
+out.push(el(BACKHAIR, '#32222e'));
+for (const [p, w] of [[[[120, 300], [90, 480], [50, 640], [20, 800], [10, 1000]], 60], [[[730, 380], [770, 520], [820, 680], [845, 900], [850, 1150]], 70]])
+  out.push(hairLock(p, w, { tip: 0.9, fill: '#3b2a37', shadeFill: '#2a1c27', strands: 3, strandColor: '#5d4558' }).svg);
+// left ear
+const LEAR = 'M5,25 C40,20 120,12 232,20 L250,140 L162,236 C120,190 60,110 5,25 Z';
+out.push(el(LEAR, '#463342'), el('M30,44 C80,40 150,38 212,52 L196,150 L150,212 C110,160 70,100 30,44 Z', '#6c576f'));
+out.push(el('M60,70 L115,92 L92,100 L140,122 L104,128 L150,160 L112,156 L134,196 L98,160 L96,184 L78,140 L58,112 L74,108 Z', '#a090a6'));
+out.push(el('M150,60 L200,64 L184,78 L206,96 L178,96 L190,122 L162,104 L158,126 L146,96 Z', '#8e7e96'));
+out.push(el('M40,24 C110,16 180,16 230,22 L222,56 C160,42 100,38 40,30 Z', '#9b7389'));
+out.push(stroke([[5, 25], [60, 108], [115, 188], [162, 236]], ink(5, 0.05, 0.2), C.hairLine), stroke([[5, 25], [80, 17], [160, 14], [234, 20]], ink(4, 0.05, 0.1), C.hairLine));
+// right ear
+const REAR = 'M556,52 C568,30 585,10 598,0 L700,0 C698,40 688,90 672,130 C662,155 650,170 640,180 L600,175 Z';
+out.push(el(REAR, '#3d2b3b'), el('M588,30 L612,40 L600,58 L620,70 L606,84 L626,96 L610,108 L630,130 L600,140 L585,100 L578,60 Z', '#a79bb4'));
+out.push(el('M602,8 L690,6 C686,50 676,90 662,118 L640,140 L628,110 L610,120 L612,90 L596,96 L604,64 L588,66 Z', '#f4eff5'));
+out.push(el('M640,20 L668,60 L650,58 L664,92 L642,74', '#d9d0e0'));
+out.push(stroke([[700, 0], [690, 60], [672, 128], [640, 180]], ink(5, 0.05, 0.2), C.hairLine), stroke([[556, 52], [576, 22], [598, 0]], ink(4, 0.1, 0.1), C.hairLine));
+
+// ---------- neck, choker, shirt
+out.push(el(NECK, C.skin));
+out.push(`<g clip-path="url(#neckClip)">${el('M370,560 L515,545 L512,585 L476,602 L440,612 L408,602 L374,585 Z', C.skinDeep)}${el('M380,628 L410,642 L440,648 L476,640 L508,622 L510,664 L476,678 L440,684 L404,678 L382,664 Z', C.skinShade)}${el('M376,560 L394,560 L400,640 L394,700 L372,680 Z', C.skinDeep)}</g>`);
+out.push(stroke([[388, 650], [385, 690]], ink(2), C.skinLine, { extra: 'opacity="0.5"' }), stroke([[498, 642], [503, 680]], ink(2), C.skinLine, { extra: 'opacity="0.5"' }));
+out.push(stroke([[394, 712], [426, 724]], ink(1.8), C.skinLine, { extra: 'opacity="0.45"' }), stroke([[458, 724], [490, 712]], ink(1.8), C.skinLine, { extra: 'opacity="0.45"' }));
+out.push(el(CHOKER, '#221b26'), el('M376,590 C394,600 414,608 434,612 L434,620 C412,616 392,608 378,600 Z', '#7c7682', 'opacity="0.9"'));
+out.push(stroke([[374, 584], [404, 600], [440, 611], [476, 602], [510, 582]], ink(1.6, 0.1, 0.1), '#a39dab', { extra: 'opacity="0.8"' }));
+
+out.push(el(SHIRT, 'url(#shirtGrad)'));
+const shirtBits = [
+  ['M58,880 C62,800 72,740 98,694 C120,672 170,662 230,656 L300,662 L300,1200 L50,1200 C52,1100 54,1000 58,880 Z', '#b57aa2', 0.35],
+  ['M90,720 L130,700 L232,960 L200,980 Z', '#e8b4ca', 0.75], ['M70,900 L95,890 L152,1200 L112,1200 Z', '#e1a7c1', 0.6],
+  ['M150,700 L185,690 L250,820 L225,835 Z', '#d99abb', 0.6],
+  ['M800,830 L812,840 L640,1010 L625,1000 Z', '#d48eac', 0.9], ['M770,760 L790,770 L600,930 L585,918 Z', '#d896b2', 0.8],
+  ['M720,700 L735,712 L620,800 L608,790 Z', '#dc9cb7', 0.8], ['M810,960 L822,980 L700,1200 L680,1200 Z', '#d08aa9', 0.8],
+  ['M610,690 L660,680 L700,760 L640,780 Z', '#fde3ec', 0.8], ['M700,820 L760,800 L700,900 L660,905 Z', '#fde3ec', 0.6],
+  ['M330,760 L520,742 L560,900 L320,920 Z', '#f8d1de', 0.7], ['M360,800 L440,790 L420,880 L380,890 Z', '#ffffff', 0.3],
+];
+out.push(`<g clip-path="url(#shirtClip)">${shirtBits.map(([d, c, a]) => el(d, c, `opacity="${a}"`)).join('')}${stroke([[98, 694], [74, 760], [60, 860], [55, 1010], [52, 1200]], () => 12, '#cdb9e2', { extra: 'opacity="0.8"' })}</g>`);
+// cat print
+out.push(el(CAT, '#fbf3f7'), `<g clip-path="url(#catClip)">${el('M300,1062 L566,1062 L566,1135 L300,1135 Z', '#ccb3cd')}${el('M300,1000 L340,1000 L320,1135 L300,1135 Z', '#e4d6e6')}</g>`);
+out.push(el('M340,1072 L398,1086 L386,1099 L348,1091 Z', '#c06f9e'), el('M452,1086 L506,1068 L501,1089 L462,1099 Z', '#c06f9e'));
+// neckline rib
+out.push(el('M300,662 C350,700 400,726 440,728 C480,726 520,700 560,670 L566,690 C524,722 482,748 440,752 C398,748 352,724 304,690 Z', '#e7a6bf'));
+out.push(stroke([[300, 662], [350, 700], [400, 726], [440, 728], [480, 726], [520, 700], [560, 670]], ink(2.4, 0.05, 0.05), C.shirtLine));
+out.push(stroke([[304, 690], [352, 724], [398, 748], [440, 752], [482, 748], [524, 722], [566, 690]], ink(2, 0.05, 0.05), C.shirtLine, { extra: 'opacity="0.7"' }));
+out.push(stroke([[98, 694], [74, 760], [60, 860], [55, 1010], [51, 1200]], ink(3, 0.02, 0.02), C.shirtLine), stroke([[705, 680], [770, 712], [808, 770], [820, 860], [824, 1000], [826, 1200]], ink(3, 0.02, 0.02), C.shirtLine));
+
+// ---------- face
+const bangDefs = [
+  [[[255, 0], [252, 100], [258, 200], [270, 290], [284, 350], [292, 380]], 58, 0.55, 3],
+  [[[305, 0], [302, 100], [308, 200], [324, 290], [340, 345], [352, 378]], 56, 0.55, 3],
+  [[[360, 0], [365, 100], [372, 200], [378, 280], [372, 340], [362, 376]], 48, 0.5, 2],
+  [[[425, 0], [432, 90], [432, 165], [415, 250], [393, 320], [388, 345]], 46, 0.5, 2],
+  [[[470, 0], [480, 80], [484, 165], [508, 250], [528, 310], [540, 345]], 54, 0.5, 2],
+  [[[525, 0], [548, 80], [572, 180], [588, 260], [597, 330]], 50, 0.5, 2],
+];
+const thinBangs = [
+  [[[520, 220], [490, 280], [462, 320], [440, 346]], 10],
+  [[[570, 240], [530, 290], [490, 320], [452, 343]], 8],
+  [[[455, 165], [452, 250], [446, 320], [442, 350]], 8],
+  [[[250, 300], [285, 330], [320, 355], [350, 378]], 9],
+  [[[230, 320], [265, 345], [300, 365], [335, 385]], 7],
+];
+const bangs = bangDefs.map(([p, w, tip, n], i) => hairLock(p, w, { tip, strands: n, seed: 10 + i, strandColor: p[0][0] > 450 ? '#f1d3db' : '#7a5d72' }));
+const thin = thinBangs.map(([p, w]) => hairLock(p, w, { tip: 0.4, line: 1.6 }));
+
+out.push(el(FACE, C.skin), crescent(FACE, 16, -10, C.skinShade));
+out.push(`<g clip-path="url(#faceClip)"><g transform="translate(-8,12)">${bangs.concat(thin).map(b => el(b.body, C.skinShade)).join('')}</g>${el('M236,300 C262,340 270,380 262,430 C258,460 262,476 276,494 L262,478 C246,456 236,420 234,380 Z', C.skinDeep)}</g>`);
+out.push(`<ellipse cx="505" cy="470" rx="70" ry="80" fill="url(#cheekLight)"/>`);
+out.push(`<ellipse cx="305" cy="465" rx="38" ry="23" fill="url(#blush)"/><ellipse cx="501" cy="431" rx="41" ry="23" fill="url(#blush)" transform="rotate(-10 501 431)"/>`);
+
+out.push(eye({
+  id: 'eyeL', iris: [318, 415], r: [27, 29], lidTop: 384,
+  open: [[258, 391], [276, 387], [294, 385], [312, 386], [328, 390], [340, 396], [349, 405], [343, 424], [333, 438], [318, 446], [300, 445], [283, 440], [269, 429], [260, 412]],
+  scleraShade: 'M250,380 L352,380 L352,402 C330,398 300,396 270,404 L250,410 Z',
+  lash: [[244, 392], [256, 385], [274, 380], [294, 377.5], [314, 378.5], [330, 383], [342, 391], [351, 402]],
+  lashW: pw([[0, 5], [0.35, 13], [0.75, 9], [1, 2.5]]),
+  extra: [
+    [[[252, 386], [240, 380], [230, 378]], pw([[0, 4], [1, 0]])],
+    [[[250, 392], [238, 392], [228, 395]], pw([[0, 3.5], [1, 0]])],
+    [[[236, 402], [250, 414], [266, 428], [284, 442]], pw([[0, 1], [0.3, 3.5], [1, 1]]), C.redLid],
+    [[[258, 393], [272, 389], [290, 387]], pw([[0, 1], [0.5, 3], [1, 0.5]]), C.redLid],
+    [[[284, 444], [300, 448], [318, 448], [334, 441], [344, 428]], pw([[0, 0.5], [0.4, 2.6], [1, 0.5]])],
+    [[[349, 405], [352, 412]], pw([[0, 2], [1, 0.5]])],
+  ],
+  hl: [[312, 392, 3.6], [321, 394.5, 2.3], [303, 404, 1.8], [334, 404, 1.6], [299, 428, 1.5]],
+  blobs: [[302, 417, 5, 4, '#ffffff'], [322, 437, 7, 3, '#fbe3ff']],
+}));
+out.push(eye({
+  id: 'eyeR', iris: [513, 378], r: [31, 33], lidTop: 344,
+  open: [[484, 377], [488, 360], [496, 349], [510, 345], [530, 343.5], [550, 344.5], [565, 348], [567, 362], [561, 379], [551, 394], [536, 405], [517, 410], [501, 406], [491, 394]],
+  scleraShade: 'M480,335 L572,335 L572,352 C550,350 520,350 490,356 L480,360 Z',
+  lash: [[481, 357], [488, 348], [500, 342], [520, 338.5], [542, 338], [560, 340], [574, 344]],
+  lashW: pw([[0, 3], [0.3, 10], [0.8, 9], [1, 5]]),
+  extra: [
+    [[[544, 336], [548, 327], [551, 320]], pw([[0, 3], [1, 0]])],
+    [[[552, 337], [558, 328], [563, 322]], pw([[0, 3], [1, 0]])],
+    [[[485, 366], [474, 376], [463, 386]], pw([[0, 2.5], [1, 0]])],
+    [[[486, 372], [477, 384], [468, 394]], pw([[0, 2.5], [1, 0]])],
+    [[[489, 380], [482, 391], [476, 399]], pw([[0, 2.2], [1, 0]])],
+    [[[497, 404], [512, 411], [528, 409], [541, 403]], pw([[0, 0.5], [0.5, 2.4], [1, 0.5]])],
+    [[[503, 411], [520, 414], [537, 410]], pw([[0, 0.5], [0.5, 2], [1, 0.5]]), C.redLid],
+    [[[546, 397], [550, 393]], () => 2], [[[552, 389], [556, 385]], () => 2], [[[540, 403], [544, 400]], () => 2],
+  ],
+  hl: [[512, 354, 4.4], [504.5, 357, 2.2], [495, 361.5, 2], [535, 367, 4], [512, 372, 2], [528, 355, 1.8]],
+  blobs: [[518, 399, 7, 5, '#fff3ff'], [497, 375, 3, 4, '#ffffff']],
+}));
+// the red outer wing of the right eye sits on top of the hair
+overHair.push(stroke([[556, 342], [572, 345], [584, 348], [594, 352]], pw([[0, 6], [1, 0.5]]), '#7a2f38'));
+
+out.push(el('M406,447 C405,438 418,436 424,441 C430,436 446,437 447,446 C447,458 436,467 424,468 C412,467 406,457 406,447 Z', '#fffafb'));
+out.push(stroke([[412, 474], [412, 481]], pw([[0, 1], [0.5, 2.2], [1, 1]]), '#6a3a44'));
+out.push(stroke([[404, 524], [410, 528], [416, 529], [422, 526], [427.5, 522], [433, 526], [438, 529], [444, 526], [450, 521]], ink(2.4, 0.1, 0.1, 0.8), '#4a2a32'));
+out.push(stroke([[404, 519], [405, 527]], () => 1.8, '#4a2a32'), stroke([[450, 517], [451, 525]], () => 1.8, '#4a2a32'));
+out.push(stroke([[268, 478], [284, 503], [316, 541], [366, 571], [412, 593], [440, 601]], pw([[0, 1], [0.5, 2.5], [1, 3.5]]), C.skinLine));
+out.push(stroke([[440, 601], [480, 588], [511, 566], [531, 541], [551, 514]], pw([[0, 3.5], [1, 1]]), C.skinLine));
+
+// ---------- front hair: side locks and the long wavy hair over the shirt
+const lit = '#f1d3db', dark = '#7a5d72';
+const front = [
+  [[[212, 0], [202, 100], [192, 220], [188, 330], [192, 430], [200, 520], [205, 600]], 70, 0.85, 4, dark],
+  [[[235, 120], [222, 230], [212, 330], [214, 420], [230, 490], [250, 560]], 40, 0.6, 2, dark],
+  [[[165, 480], [150, 580], [130, 680], [125, 780], [140, 880], [160, 960], [150, 1020]], 48, 0.7, 3, dark],
+  [[[205, 560], [190, 640], [175, 720], [190, 800], [225, 860], [240, 920], [225, 975], [200, 1000]], 52, 0.75, 3, dark],
+  [[[240, 520], [245, 620], [235, 720], [250, 800], [285, 860], [305, 930], [295, 990], [270, 1040]], 46, 0.7, 3, dark],
+  [[[275, 560], [280, 650], [290, 740], [310, 800], [325, 850]], 18, 0.5, 0, dark],
+  [[[215, 600], [205, 700], [215, 780], [250, 840], [262, 890]], 14, 0.5, 0, dark],
+  [[[660, 180], [690, 300], [715, 420], [740, 540], [770, 640], [800, 740]], 70, 0.8, 4, lit],
+  [[[628, 220], [640, 320], [642, 420], [630, 520], [612, 620], [600, 720], [615, 810], [640, 890], [650, 950]], 50, 0.75, 3, lit],
+  [[[592, 200], [598, 300], [590, 400], [576, 490], [560, 580], [548, 660], [555, 740], [580, 820], [598, 890], [590, 960], [565, 1010]], 56, 0.8, 4, lit],
+  [[[565, 290], [574, 380], [566, 460], [550, 530], [538, 585]], 20, 0.6, 0, lit],
+].map(([p, w, tip, n, sc], i) => hairLock(p, w, { tip, strands: n, strandColor: sc, seed: 30 + i }));
+// cast shadows of the front hair on the face and shirt
+out.push(`<g clip-path="url(#faceClip)"><g transform="translate(-10,8)">${front.map(f => el(f.body, C.skinDeep)).join('')}</g></g>`);
+out.push(`<g clip-path="url(#shirtClip)"><g transform="translate(-12,14)">${front.map(f => el(f.body, C.shirtDeep, 'opacity="0.55"')).join('')}</g></g>`);
+out.push(hairLock([[140, 190], [132, 230], [122, 275]], 26, { tip: 0.6, fill: '#9668b8', shadeFill: '#6e4a92' }).svg);
+for (const [p, c] of [[[[150, 272], [110, 288], [70, 302], [40, 318]], '#b07ab8'], [[[152, 282], [118, 300], [86, 316], [60, 330]], '#8a5a96'], [[[148, 290], [120, 306], [100, 322]], '#3a2836']])
+  out.push(stroke(p, pw([[0, 3], [1, 0]]), c));
+out.push(...front.map(f => f.svg));
+// pink streak by the right ear
+out.push(stroke([[655, 100], [690, 150], [730, 190], [768, 208]], pw([[0, 16], [0.7, 10], [1, 0]]), '#f09cc0'));
+out.push(stroke([[662, 112], [700, 160], [740, 195]], pw([[0, 6], [1, 0]]), '#fde0ea'));
+out.push(stroke([[650, 95], [700, 140], [745, 180], [772, 206]], pw([[0, 2.5], [1, 0.5]]), C.hairLine));
+
+// ---------- bangs, brows, clips
+out.push(...bangs.map(b => b.svg), ...thin.map(b => b.svg));
+out.push(stroke([[300, 343], [322, 351], [344, 360], [363, 372]], pw([[0, 1], [0.3, 4.5], [0.8, 5.5], [1, 2]]), '#3b2430', { extra: 'opacity="0.9"' }));
+out.push(stroke([[503, 325], [480, 331], [458, 337], [438, 347]], pw([[0, 1], [0.3, 4.5], [0.8, 5.5], [1, 2]]), '#3b2430', { extra: 'opacity="0.9"' }));
+out.push(...overHair);
+// X clip
+const bar = (x1, y1, x2, y2) => stroke([[x1, y1], [x2, y2]], () => 13, '#2a2235') + stroke([[x1, y1], [x2, y2]], () => 9, '#aabbe0') + stroke([[x1 + 2, y1], [x2 - 4, y2 - 3]], () => 2.5, '#eef3ff');
+out.push(bar(163, 293, 218, 340), bar(220, 297, 161, 337));
+out.push(`<rect x="162" y="357" width="61" height="16" rx="7" fill="#aabbe0" stroke="#2a2235" stroke-width="2.5"/><rect x="168" y="360" width="46" height="3" rx="1.5" fill="#eef3ff"/>`);
+// cat clip
+out.push(`<g transform="rotate(4 592 260)">
+<rect x="567" y="265" width="56" height="15" rx="6" fill="#f2a3c3" stroke="#2a2235" stroke-width="2.5"/><rect x="574" y="268" width="40" height="3" rx="1.5" fill="#ffd9e8"/>
+<rect x="571" y="286" width="57" height="17" rx="7" fill="#f2a3c3" stroke="#2a2235" stroke-width="2.5"/><rect x="578" y="289" width="42" height="3.5" rx="1.5" fill="#fff0f6"/>
+<path d="M565,262 C562,248 562,236 566,226 L569,213 L581,222 C588,220 594,220 600,222 L607,210 L613,224 C618,236 619,250 617,262 C600,266 582,266 565,262 Z" fill="#2b2230" stroke="#fff" stroke-width="2.5"/>
+<path d="M565,262 C562,248 562,236 566,226 L569,213 L581,222 C588,220 594,220 600,222 L607,210 L613,224 C618,236 619,250 617,262" fill="none" stroke="#2a2235" stroke-width="1.2"/>
+<circle cx="582" cy="244" r="2.2" fill="#fff"/><circle cx="600" cy="243" r="2.2" fill="#fff"/></g>`);
+
+// ---------- light from the window
+out.push(`<rect width="${W}" height="${H}" fill="url(#light)" style="mix-blend-mode:soft-light" opacity="0.6"/>`);
+
+fs.writeFileSync(__dirname + '/06-catgirl.svg',
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs>${defs.join('')}</defs>\n${out.join('\n')}\n</svg>\n`);

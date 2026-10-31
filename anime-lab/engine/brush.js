@@ -41,9 +41,17 @@ const el = (d, fill, extra = '') => `<path d="${d}" fill="${fill}"${extra ? ' ' 
 // Width profiles. ink: thin-thick-thin pen pressure. lockWidth: full, then a sharp tip.
 const ink = (w, a = 0.25, b = 0.35, min = 0) => t => Math.max(min, w * Math.min(1, t / a, (1 - t) / b) ** 0.6);
 const lockWidth = (w, tip = 0.55) => t => t < tip ? w : w * Math.cos((t - tip) / (1 - tip) * Math.PI / 2);
+// Piecewise-linear width profile from [t, width] pairs, e.g. pw([[0, 2], [0.4, 9], [1, 0]]).
+const pw = pts => t => {
+  for (let i = 1; i < pts.length; i++) if (t <= pts[i][0]) {
+    const [t0, w0] = pts[i - 1], [t1, w1] = pts[i];
+    return w0 + (w1 - w0) * (t - t0) / ((t1 - t0) || 1);
+  }
+  return pts[pts.length - 1][1];
+};
 
 function stroke(pts, w, color, opts = {}) {
-  return el(outline(ribbon(pts, typeof w === 'function' ? w : ink(w, opts.a, opts.b, opts.min))), color, opts.extra);
+  return el(outline(ribbon(pts, typeof w === 'function' ? w : ink(w, opts.a, opts.b, opts.min), opts.segs ?? 16)), color, opts.extra);
 }
 
 // A hair clump: body shape, a cel-shaded band along one edge, and tapered edge lines.
@@ -75,4 +83,4 @@ function rng(seed) {
   };
 }
 
-module.exports = { fmt, spline, ribbon, path, outline, el, ink, lockWidth, stroke, lock, sparkle, rng };
+module.exports = { fmt, spline, ribbon, path, outline, el, ink, lockWidth, pw, stroke, lock, sparkle, rng };

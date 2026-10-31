@@ -34,6 +34,27 @@ The study drawings in `attempts/` are derivatives, so they're shared under CC BY
 - **Hair:** her twin tails flare out wide with many thin strands. Mine are two smooth blobs.
 - **Face:** her chin is smaller and her eyes sit lower and wider apart.
 
+## Master study: cat-eared girl (attempts 06-09)
+A one-to-one study of a professional illustration the user shared. **The reference image isn't in this
+repo:** its artist and licence are unknown, so it stays local (`reference/private/` is git-ignored).
+The method is how artists do master studies, just with code:
+1. **Grid measuring:** a labelled grid over the reference (plus 4x zooms of the eyes) to read off
+   every landmark: eye corners, iris centres, chin, choker, clips, shoulders, lock tips.
+2. **Lightbox overlay:** `compare.py` blends my render 50/50 with the reference to spot misplaced shapes.
+3. **Eyedropper:** `pick.py` samples the reference along each hair lock I drew and stores only its colours
+   (`attempts/09-colors.json`). Every shape is still drawn by the brush engine.
+
+| # | What changed |
+|---|---|
+| 06 | First measured pass: face landmarks land almost exactly; hair too dark and blocky. |
+| 07 | Lighter hair toward the window, wavy locks, shirt folds as tapered strokes, softer brows. |
+| 08 | Eyedropped colours per lock, forehead gap re-measured (narrow V at x≈460-520), S-curve waves and curls. |
+| 09 | Hair as one soft mass: fainter shade bands, finer outlines, many more dark/light strand lines. |
+
+Biggest remaining gap: the reference hair has far more strands and subtler lighting than my locks.
+
+Rebuild: `node attempts/09-catgirl.js && node render.js attempts/09-catgirl.svg attempts/09-catgirl.png`
+
 ## Next ideas (attempts 04-05)
 - A real 3/4 view instead of front-on.
 - Hands, or a full upper-body pose.
