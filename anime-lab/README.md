@@ -87,6 +87,30 @@ python3 -m venv /tmp/sdenv && /tmp/sdenv/bin/pip install torch --index-url https
 /tmp/sdenv/bin/python experiments/hybrid.py attempts/05-original.png experiments/out 0 0.4 0.55 0.7
 ```
 
+## No more SVG: JavaScript canvas and Blender Grease Pencil (`canvas/`, `blender/`)
+The drawing is written once as drawing actions: layers, lasso fills, pressure strokes, airbrush dots and
+clipping masks. Two instruments perform the same actions:
+- **Canvas** (`canvas/paint.js`): my raster painting engine in headless Chromium. Brush tips are stamped
+  along smooth paths with pen pressure, and layers blend with multiply/screen. The hair is ~1,000 painted strands.
+- **Blender 4.2 Grease Pencil** (`blender/replay.py`): every action becomes a real GP stroke (pressure +
+  hardness per stroke), a fill stroke, or a GP layer mask; rendered headless with EEVEE on software
+  OpenGL (Xvfb + Mesa), ~10 s per frame.
+
+Findings: the canvas brushes give the most hand-drawn texture so far. Grease Pencil reproduces the
+drawing faithfully, but its real strength is animation (`blender/animate.py`: frame-by-frame blink,
+drifting petals, noise "line boil" on the hair). Grease Pencil gotchas found on the way:
+- a layer's masks combine as a union, not an intersection
+- a *hidden* mask layer stops masking; use 0% opacity instead
+- single-point dots don't grow big enough for airbrush work (stacked rings stand in)
+
+Run:
+```
+node canvas/run.js canvas/girl.js canvas/out/girl-canvas.png canvas/out/girl-actions.json
+xvfb-run -a blender -b --factory-startup -P blender/replay.py -- canvas/out/girl-actions.json $PWD/blender/out/girl-gp.png
+xvfb-run -a blender -b --factory-startup -P blender/animate.py -- canvas/out/girl-actions.json /tmp/frames/
+```
+(Blender 4.2 LTS from download.blender.org; on a bare Linux box also `apt-get install libegl1 xvfb`.)
+
 ## Next ideas (attempts 04-05)
 - A real 3/4 view instead of front-on.
 - Hands, or a full upper-body pose.
