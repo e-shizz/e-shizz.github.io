@@ -56,14 +56,14 @@ Biggest remaining gap: the reference hair has far more strands and subtler light
 Rebuild: `node attempts/09-catgirl.js && node render.js attempts/09-catgirl.svg attempts/09-catgirl.png`
 
 ## Experiment: does SVG hold me back? (`experiments/`)
-Same original character (attempt 05) through four pipelines:
+Same original character (attempt 05) through four pipelines. Side by side: `experiments/comparison.png`.
 
 | | Pipeline | Who does what | Result |
 |---|---|---|---|
 | A | Flat SVG (attempt 05) | all code | Clean but reads as clip art |
 | B | SVG + anime compositing (`satsuei.py`) | all code | Glow, halo, rim light, bokeh: looks like an anime frame, but the drawing's flaws stay |
 | B2 | B + dense hair strands (`DENSE=1`) | all code | Slightly richer hair texture; small gain |
-| C | My drawing → anime diffusion model, img2img (`hybrid.py`) | I design and compose, the model renders | **Best:** keeps my design (golden eyes, navy collar, bow, tilt, sky) at real anime quality |
+| C | My drawing → anime diffusion model, img2img (`hybrid.py`) | I design and compose, the model renders | **Best at 40%:** keeps my design (golden eyes, navy collar, bow, tilt, sky) at real anime quality. At 55% the eyes drift orange; at 70% it adds red eyes, a hair bow and cherry trees |
 | D | Diffusion model from text only | model only | Polished, but it invents its own girl (purple eyes, pink collar, hair ribbon) |
 
 **Findings**
