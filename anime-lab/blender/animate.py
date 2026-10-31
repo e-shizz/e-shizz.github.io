@@ -51,7 +51,7 @@ for f in range(2, N + 1):
 
 # Line boil: fresh noise every 2 frames on the hair strokes, like redrawn animation lines.
 boil = gpo.grease_pencil_modifiers.new('Boil', 'GP_NOISE')
-boil.layer, boil.factor, boil.factor_strength, boil.factor_thickness = 'hair', 0.2, 0.0, 0.15
+boil.layer, boil.factor, boil.factor_strength, boil.factor_thickness = 'hair', 0.07, 0.0, 0.1
 boil.noise_scale, boil.use_random, boil.step = 0.6, True, 2
 
 scene.render.filepath = os.path.join(out_path, 'frame_')
